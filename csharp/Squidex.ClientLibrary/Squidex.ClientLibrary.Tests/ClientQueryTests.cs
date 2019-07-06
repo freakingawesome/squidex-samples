@@ -47,7 +47,7 @@ namespace Squidex.ClientLibrary.Tests
         [Fact]
         public async Task Should_return_items_with_ordering()
         {
-            var items = await Fixture.Client.GetAsync(new ODataQuery { Skip = 2, Top = 5, OrderBy = "data/value/iv desc" });
+            var items = await Fixture.Client.GetAsync(new ODataQuery { Skip = 2, Top = 5, OrderBy = $"data/{TestClient.FieldName}/iv desc" });
 
             AssertItems(items, 10, new[] { 8, 7, 6, 5, 4 });
         }
@@ -55,7 +55,7 @@ namespace Squidex.ClientLibrary.Tests
         [Fact]
         public async Task Should_return_items_with_filter()
         {
-            var items = await Fixture.Client.GetAsync(new ODataQuery { Filter = "data/value/iv gt 3 and data/value/iv lt 7" });
+            var items = await Fixture.Client.GetAsync(new ODataQuery { Filter = $"data/{TestClient.FieldName}/iv gt 3 and data/{TestClient.FieldName}/iv lt 7" });
 
             AssertItems(items, 3, new[] { 4, 5, 6 });
         }

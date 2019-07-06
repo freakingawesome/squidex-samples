@@ -24,7 +24,7 @@ namespace Squidex.ClientLibrary.Tests
         [Fact]
         public async Task Should_query_schemas()
         {
-            var schemas = await schemasClient.GetSchemasAsync(TestClient.ClientManager.App);
+            var schemas = await schemasClient.GetSchemasAsync(TestClient.AppName);
 
             Assert.NotEmpty(schemas.Items);
         }
@@ -32,7 +32,7 @@ namespace Squidex.ClientLibrary.Tests
         [Fact]
         public async Task Should_query_schema()
         {
-            var schema = await schemasClient.GetSchemaAsync(TestClient.ClientManager.App, "numbers");
+            var schema = await schemasClient.GetSchemaAsync(TestClient.AppName, TestClient.SchemaName);
 
             Assert.NotNull(schema);
         }
@@ -40,26 +40,37 @@ namespace Squidex.ClientLibrary.Tests
         [Fact]
         public async Task Should_create_schema()
         {
-            await schemasClient.PostSchemaAsync(TestClient.ClientManager.App, new CreateSchemaDto
+            SchemaDetailsDto schema = null;
+            try
             {
-                Name = "new-schema",
-                Properties = new SchemaPropertiesDto
+                schema = await schemasClient.PostSchemaAsync(TestClient.AppName, new CreateSchemaDto
                 {
-                    Label = "New Schema"
-                },
-                Fields = new List<UpsertSchemaFieldDto>
-                {
-                    new UpsertSchemaFieldDto
+                    Name = "new-schema",
+                    Properties = new SchemaPropertiesDto
                     {
-                        Name = "String",
-                        Properties = new StringFieldPropertiesDto
+                        Label = "New Schema"
+                    },
+                    Fields = new List<UpsertSchemaFieldDto>
+                    {
+                        new UpsertSchemaFieldDto
                         {
-                            IsRequired = true
+                            Name = "String",
+                            Properties = new StringFieldPropertiesDto
+                            {
+                                IsRequired = true
+                            }
                         }
-                    }
-                },
-                IsPublished = true
-            });
+                    },
+                    IsPublished = true
+                });
+            }
+            finally
+            {
+                if (schema != null)
+                {
+                    await schemasClient.DeleteSchemaAsync(TestClient.AppName, schema.Name);
+                }
+            }
         }
     }
 }

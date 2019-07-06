@@ -5,6 +5,7 @@
 //  All rights reserved. Licensed under the MIT license.
 // ==========================================================================
 
+using System;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -25,13 +26,13 @@ namespace Squidex.ClientLibrary.Tests
             TestEntity item = null;
             try
             {
-                item = await Fixture.Client.CreateAsync(new TestEntityData { Value = 1 });
+                item = await Fixture.Client.CreateAsync(new TestEntityData { Value = RandomId() });
 
                 await Assert.ThrowsAsync<SquidexException>(() => Fixture.Client.GetAsync(item.Id));
             }
             finally
             {
-                await Fixture.Client.DeleteAsync(item.Id);
+                await TryDeleteAsync(item);
             }
         }
 
@@ -41,13 +42,13 @@ namespace Squidex.ClientLibrary.Tests
             TestEntity item = null;
             try
             {
-                item = await Fixture.Client.CreateAsync(new TestEntityData { Value = 1 }, true);
+                item = await Fixture.Client.CreateAsync(new TestEntityData { Value = RandomId() }, true);
 
                 await Fixture.Client.GetAsync(item.Id);
             }
             finally
             {
-                await Fixture.Client.DeleteAsync(item.Id);
+                await TryDeleteAsync(item);
             }
         }
 
@@ -57,14 +58,14 @@ namespace Squidex.ClientLibrary.Tests
             TestEntity item = null;
             try
             {
-                item = await Fixture.Client.CreateAsync(new TestEntityData { Value = 1 });
+                item = await Fixture.Client.CreateAsync(new TestEntityData { Value = RandomId() });
 
                 await Fixture.Client.ChangeStatusAsync(item.Id, Status.Published);
                 await Fixture.Client.GetAsync(item.Id);
             }
             finally
             {
-                await Fixture.Client.DeleteAsync(item.Id);
+                await TryDeleteAsync(item);
             }
         }
 
@@ -74,7 +75,7 @@ namespace Squidex.ClientLibrary.Tests
             TestEntity item = null;
             try
             {
-                item = await Fixture.Client.CreateAsync(new TestEntityData { Value = 1 }, true);
+                item = await Fixture.Client.CreateAsync(new TestEntityData { Value = RandomId() }, true);
 
                 await Fixture.Client.ChangeStatusAsync(item.Id, Status.Archived);
 
@@ -82,7 +83,7 @@ namespace Squidex.ClientLibrary.Tests
             }
             finally
             {
-                await Fixture.Client.DeleteAsync(item.Id);
+                await TryDeleteAsync(item);
             }
         }
 
@@ -92,7 +93,7 @@ namespace Squidex.ClientLibrary.Tests
             TestEntity item = null;
             try
             {
-                item = await Fixture.Client.CreateAsync(new TestEntityData { Value = 1 });
+                item = await Fixture.Client.CreateAsync(new TestEntityData { Value = RandomId() });
 
                 await Fixture.Client.ChangeStatusAsync(item.Id, Status.Published);
                 await Fixture.Client.ChangeStatusAsync(item.Id, Status.Draft);
@@ -101,7 +102,7 @@ namespace Squidex.ClientLibrary.Tests
             }
             finally
             {
-                await Fixture.Client.DeleteAsync(item.Id);
+                await TryDeleteAsync(item);
             }
         }
 
@@ -111,7 +112,7 @@ namespace Squidex.ClientLibrary.Tests
             TestEntity item = null;
             try
             {
-                item = await Fixture.Client.CreateAsync(new TestEntityData { Value = 1 }, true);
+                item = await Fixture.Client.CreateAsync(new TestEntityData { Value = RandomId() }, true);
 
                 await Fixture.Client.UpdateAsync(item.Id, new TestEntityData { Value = 2 });
 
@@ -121,7 +122,7 @@ namespace Squidex.ClientLibrary.Tests
             }
             finally
             {
-                await Fixture.Client.DeleteAsync(item.Id);
+                await TryDeleteAsync(item);
             }
         }
 
@@ -131,7 +132,7 @@ namespace Squidex.ClientLibrary.Tests
             TestEntity item = null;
             try
             {
-                item = await Fixture.Client.CreateAsync(new TestEntityData { Value = 1 }, true);
+                item = await Fixture.Client.CreateAsync(new TestEntityData { Value = RandomId() }, true);
 
                 await Fixture.Client.PatchAsync(item.Id, new TestEntityData { Value = 2 });
 
@@ -141,8 +142,21 @@ namespace Squidex.ClientLibrary.Tests
             }
             finally
             {
+                await TryDeleteAsync(item);
+            }
+        }
+
+        private async Task TryDeleteAsync(TestEntity item)
+        {
+            if (item != null)
+            {
                 await Fixture.Client.DeleteAsync(item.Id);
             }
+        }
+
+        private static int RandomId()
+        {
+            return (int)DateTime.UtcNow.Ticks;
         }
     }
 }
